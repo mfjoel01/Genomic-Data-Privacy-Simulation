@@ -1,19 +1,19 @@
 # Genomic Data Privacy Simulation
 
-End‑to‑end simulation for **secure GWAS & PGS benchmarking** on chr22.  
-Compares **Baseline**, **Differential Privacy**, and **Federated Learning** pipelines.  
-**No data is hosted in this repository** — scripts fetch/use public resources.
+This repository contains scripts and workflows for simulating genomic data and evaluating privacy-preserving techniques across multiple analysis stages. Pipelines are organized by numbered folders that roughly follow the order of execution, from data preparation through method comparison.
 
----
+## Repository structure
+- `0_Prep/` – utilities for preparing simulation inputs and shared resources.
+- `00_HapGen2Simulation/` – configuration and helpers for running HapGen2-based genotype simulations.
+- `1_Phenotype/` – scripts for generating phenotypes from the simulated genotypes.
+- `2_Baseline/` – baseline association analyses used as reference points.
+- `3_DifferentialPrivacy/` – experiments applying differential privacy mechanisms to the analyses.
+- `4_FederatedLearning/` – materials related to federated learning workflows.
+- `5_MethodComparison/` – notebooks and scripts comparing results across approaches.
+- `Scripts/` and `R/` – shared helper scripts and R utilities used throughout the project.
 
-## What’s here
-- Reproducible R + Bash/Slurm code for HPC environments.
-- Stages: `00_HapGen2Simulation/` → `0_Prep/` → `1_Phenotype/` → `2_Baseline/` → `3_DifferentialPrivacy/` → `4_FederatedLearning/` → `5_MethodComparison/`.
-- Slurm drivers in `Scripts/`.
-
-## What you need (not in repo)
-
-> Put the files below under `00_HapGen2Simulation/input/1000G/` unless noted.
+## Data availability
+No datasets are hosted in this repository. To reproduce the simulations you will need to provide your own input data and configure paths accordingly. The needed files are as follows:  
 
 **1) 1000 Genomes (IGSR) Phase 3, GRCh37 (chr22)**
 - VCF: `ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz`  
@@ -41,47 +41,35 @@ Download the harmonized scoring files (`*_hmPOS_GRCh37.txt.gz`) from the score p
   https://www.pgscatalog.org/score/PGS004994/  
 PGS Catalog download notes (hmPOS GRCh37/38): https://www.pgscatalog.org/downloads/
 
-> Optional tools (installed in your container/environment): **bcftools**, **HAPGEN2**, **R** + packages used in the scripts.
 
----
+## Quick start
+1. Clone the repository and create a working directory for intermediate outputs.
+2. Configure environment variables (e.g., reference data paths) expected by the shell drivers in `Scripts/`. These scripts orchestrate the numbered stages and can be adapted to your local toolchain (Python, R, HapGen2, etc.).
+3. Review the configuration files within each stage directory and update them to point to your local input data.
 
-## Quick start (HPC / Slurm)
+## How to run
+Review the numbered folders in order to understand the expected workflow—each stage contains notes or scripts that describe required dependencies. After tailoring configuration variables to your environment:
 
-```bash
-# 0) Clone
-git clone https://github.com/mfjoel01/Genomic-Data-Privacy-Simulation.git
-cd Genomic-Data-Privacy-Simulation
+- To execute the full pipeline sequentially, use the consolidated driver:
 
-# 1) Create expected folders for HAPGEN2 stage
-bash 00_HapGen2Simulation/scripts/0_make_tree.sh
+  ```bash
+  bash Scripts/run_stages.sh
+  ```
+- You can also specify to run only certain stages
 
-# 2) Place required files:
-#    - .../input/1000G/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz
-#    - .../input/1000G/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi
-#    - .../input/1000G/integrated_call_samples_v3.20130502.ALL.panel
-#    - .../input/1000G/genetic_map_chr22_combined_b37.txt
-#    - Data/pgs/PGS003443_hmPOS_GRCh37.txt.gz
-#    - Data/pgs/PGS004994_hmPOS_GRCh37.txt.gz
+- 
+- Individual stages can also be run with the dedicated helpers, for example:
 
-# 3) (Optional) point to your Singularity/Apptainer image when submitting
-#    export container=/path/to/your_image.sif
+  ```bash
+  bash Scripts/0_prep_driver.sh      # prepare shared inputs
+  bash Scripts/1_pheno_driver.sh     # derive phenotypes
+  bash Scripts/2_baseline_driver.sh  # perform baseline analyses
+  ```
 
-# 4) Run the stages with Slurm drivers (examples)
-sbatch Scripts/1_pheno_driver.sh
-sbatch Scripts/2_baseline_driver.sh
-sbatch Scripts/3_dp_driver.sh
-sbatch Scripts/4_federated_driver.sh
-sbatch Scripts/5_method_compare_driver.sh
-# or chain stages with:
-bash Scripts/run_stages.sh 1 5
-````
+  Adjust each script's configuration variables before running to point to your data locations.
 
-**Outputs:** each stage writes plots and text summaries under its `output/` directory.
+  ## Outputs (high‑level)
 
----
-
-## Notes
-
-* Built for **HPC clusters** using **Slurm**.
-* Uses IGSR/1000G Phase 3 on **GRCh37** (hg19).
-* PGS weights come from the **PGS Catalog** and are applied on chr22 for the simulated cohort.
+* **Plots**: Manhattan/QQ, ROC curves, binned BMI vs PGS, K‑sweep panels, effect/score comparisons, per‑person y=x, and run‑to‑run variability. See each stage’s `output/graphs/`.
+* **Text**: AUC/R² summaries, Bonferroni thresholds, DP selection summaries, sweep metrics (CSV). Global caches live under `Data/global/`. 
+ 
