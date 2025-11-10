@@ -1,1 +1,1 @@
-placeholder file. R libraries will be installed and loaded from here by default.
+placeholder file. R libraries will be installed and loaded here by default.
