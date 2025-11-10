@@ -1,6 +1,6 @@
 # Genomic Data Privacy Simulation
 
-This repository contains scripts and workflows for simulating genomic data and evaluating privacy-preserving techniques across multiple analysis stages. Pipelines are organized by numbered folders that roughly follow the order of execution, from data preparation through method comparison.
+This repository contains scripts and workflows for simulating genomic data and evaluating privacy-preserving techniques across multiple analysis stages. Pipelines are organized by numbered folders that follow the order of execution, from data preparation through method comparison.
 
 ## Repository structure
 - `0_Prep/` – utilities for preparing simulation inputs and shared resources.
@@ -11,17 +11,19 @@ This repository contains scripts and workflows for simulating genomic data and e
 - `4_FederatedLearning/` – materials related to federated learning workflows.
 - `5_MethodComparison/` – notebooks and scripts comparing results across approaches.
 - `Scripts/` and `R/` – shared helper scripts and R utilities used throughout the project.
+- `R Libraries/` - installation location of needed R packages
 
 ## Data availability
 No datasets are hosted in this repository. To reproduce the simulations you will need to provide your own input data and configure paths accordingly. More information and download links for needed data can be found at the end.
 
 ## Quick start
 1. Clone the repository and create a working directory for intermediate outputs.
-2. Configure environment variables (e.g., reference data paths) expected by the shell drivers in `Scripts/`. These scripts orchestrate the numbered stages and can be adapted to your local toolchain (R, HapGen2, etc.).
-3. Review the configuration files within each stage directory and update them to point to your local input data.
+2. Download the six needed data files.
+3. Configure environment variables (e.g., reference data paths) expected by the shell drivers in `Scripts/`. These scripts orchestrate the numbered stages and can be adapted to your local toolchain (R, HapGen2, etc.).
+4. Review the configuration files within each stage directory and update them to point to your local input data.
 
 ## How to run
-Review the numbered folders in order to understand the expected workflow—each stage contains notes or scripts that describe required dependencies. After tailoring configuration variables to your environment:
+Review the numbered folders in order to understand the expected workflow. Each stage contains notes or scripts that describe required dependencies. After tailoring configuration variables to your environment:
 
 - To execute the full pipeline sequentially, use the consolidated driver:
 
@@ -31,7 +33,7 @@ Review the numbered folders in order to understand the expected workflow—each 
 - You can also specify to run only certain stages
 
   ```bash
-  bash Scripts/run_stages.sh 2 3     # runs only stages 2 then 3
+  bash Scripts/run_stages.sh 2 4     # runs stages 2, 3, then 4
   ```
   
 - Individual stages can also be run with the dedicated helpers, for example:
@@ -49,3 +51,46 @@ Review the numbered folders in order to understand the expected workflow—each 
 * **Plots**: Manhattan/QQ, ROC curves, binned BMI vs PGS, K‑sweep panels, effect/score comparisons, per‑person y=x, and run‑to‑run variability. See each stage’s `output/graphs/`.
 * **Text**: AUC/R² summaries, Bonferroni thresholds, DP selection summaries, sweep metrics (CSV). Global caches live under `Data/global/`. 
  
+## Required Data
+
+### 1) 1000 Genomes, Phase 3, GRCh37, chr22
+
+* **VCF**
+  `ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz`
+  Link: [https://hgdownload.cse.ucsc.edu/gbdb/hg19/1000Genomes/phase3/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz](https://hgdownload.cse.ucsc.edu/gbdb/hg19/1000Genomes/phase3/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz)
+  **Place at:** `00_HapGen2Simulation/input/1000G/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz`
+
+* **Index (.tbi)**
+  `ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi`
+  Link: [https://hgdownload.cse.ucsc.edu/gbdb/hg19/1000Genomes/phase3/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi](https://hgdownload.cse.ucsc.edu/gbdb/hg19/1000Genomes/phase3/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi)
+  **Place at:** `00_HapGen2Simulation/input/1000G/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi`
+
+* **Sample panel** (superpopulation labels for EUR subsetting)
+  `integrated_call_samples_v3.20130502.ALL.panel`
+  Link: [https://bochet.gcc.biostat.washington.edu/beagle/1000_Genomes_phase3_v5a/sample_info/integrated_call_samples_v3.20130502.ALL.panel](https://bochet.gcc.biostat.washington.edu/beagle/1000_Genomes_phase3_v5a/sample_info/integrated_call_samples_v3.20130502.ALL.panel)
+  **Place at:** `00_HapGen2Simulation/input/1000G/integrated_call_samples_v3.20130502.ALL.panel`
+
+* **Genetic map** GRCh37 for chr22
+  `genetic_map_chr22_combined_b37.txt`
+  Get it from the IMPUTE2, 1000G Phase 3 archive: [https://mathgen.stats.ox.ac.uk/impute/1000GP_Phase3.html](https://mathgen.stats.ox.ac.uk/impute/1000GP_Phase3.html)
+  **Place at:** `00_HapGen2Simulation/input/1000G/genetic_map_chr22_combined_b37.txt`
+
+* **IGSR Phase 3 overview**
+  [https://www.internationalgenome.org/data-portal/data-collection/phase-3](https://www.internationalgenome.org/data-portal/data-collection/phase-3)
+
+---
+
+### 2) PGS Catalog scoring files, harmonized GRCh37
+
+* **T2D**, PGS003443 harmonized positions
+  `PGS003443_hmPOS_GRCh37.txt.gz`
+  Score page: [https://www.pgscatalog.org/score/PGS003443/](https://www.pgscatalog.org/score/PGS003443/)
+  **Place at:** `Data/pgs/PGS003443_hmPOS_GRCh37.txt.gz`
+
+* **BMI**, PGS004994 harmonized positions
+  `PGS004994_hmPOS_GRCh37.txt.gz`
+  Score page: [https://www.pgscatalog.org/score/PGS004994/](https://www.pgscatalog.org/score/PGS004994/)
+  **Place at:** `Data/pgs/PGS004994_hmPOS_GRCh37.txt.gz`
+
+* **PGS Catalog download notes**
+  [https://www.pgscatalog.org/downloads/](https://www.pgscatalog.org/downloads/)
